@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DIJUMPER Lab - Eksperimen & Utilitas Digital</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Inter & Fira Code (Monospace) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Fira Code', 'monospace'],
+                    },
+                    colors: {
+                        lab: {
+                            bg: '#f8fafc', // Clean slate-50 background (sterile lab feel)
+                            panel: '#ffffff',
+                            primary: '#0ea5e9', // Cyber blue / energy
+                            accent: '#10b981', // Emerald green / success
+                            text: '#0f172a', // Slate-900
+                            muted: '#64748b', // Slate-500
+                            border: '#e2e8f0' // Slate-200
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Custom styles to enhance the lab theme */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+            overflow-x: hidden;
+        }
+        
+        /* Grid background pattern mimic graph paper */
+        .grid-pattern {
+            background-size: 40px 40px;
+            background-image: 
+                linear-gradient(to right, rgba(14, 165, 233, 0.04) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(14, 165, 233, 0.04) 1px, transparent 1px);
+        }
+
+        /* Glassmorphism styling */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03);
+        }
+
+        /* Pulse glowing effect */
+        .pulse-glow {
+            box-shadow: 0 0 15px rgba(14, 165, 233, 0.4);
+            animation: pulse-animation 2s infinite;
+        }
+
+        @keyframes pulse-animation {
+            0% { box-shadow: 0 0 0px rgba(14, 165, 233, 0.4); }
+            50% { box-shadow: 0 0 15px rgba(14, 165, 233, 0.6); }
+            100% { box-shadow: 0 0 0px rgba(14, 165, 233, 0.4); }
+        }
+
+        /* Terminal styling */
+        .terminal-container {
+            background-color: #0b0f19;
+            border: 1px solid #1e293b;
+        }
+    </style>
+</head>
+<body class="grid-pattern relative min-h-screen text-slate-800">
+
+    <!-- Interactive Molecule/Network Canvas -->
+    <canvas id="labCanvas" class="fixed top-0 left-0 w-full h-full pointer-events-none z-0"></canvas>
+
+    <!-- Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+    <div class="relative z-10 min-h-screen flex flex-col justify-between">
+        
+        <!-- Header -->
+        <header class="w-full border-b border-slate-200/60 glass-panel sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-sky-500 to-indigo-600 flex items-center justify-center text-white font-mono font-bold shadow-md shadow-sky-100">
+                        D
+                    </div>
+                    <div>
+                        <span class="font-mono text-xs text-sky-500 tracking-wider font-semibold">PROJECT REPOSITORY</span>
+                        <h1 class="text-lg font-bold text-slate-900 tracking-tight leading-none">DIJUMPER LAB</h1>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 flex-grow w-full">
+            
+            <!-- Hero / Lab Bio Section -->
+            <section class="mb-16 text-center max-w-3xl mx-auto">
+                <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-sky-50 border border-sky-100 mb-4">
+                    <i class="fa-solid fa-flask text-sky-500 text-xs"></i>
+                    <span class="text-xs font-mono font-semibold text-sky-700">EXPERIMENTAL SPACE v1.0.0</span>
+                </div>
+                <h2 class="text-4xl md:text-5xl font-extrabold text-slate-950 tracking-tight mb-4">
+                    Pusat Riset & <span class="bg-gradient-to-r from-sky-500 to-indigo-600 bg-clip-text text-transparent">Eksperimen Digital</span> DIJUMPER
+                </h2>
+                <p class="text-base md:text-lg text-slate-600 leading-relaxed">
+                    Selamat datang di ruang inkubasi kami. Di sini kami merakit, menguji, dan meluncurkan berbagai aplikasi serta utilitas web eksperimental yang dibangun untuk kegunaan publik.
+                </p>
+                
+                <!-- AI Development Badge -->
+                <div class="mt-6 flex justify-center">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900 border border-slate-700 shadow-lg text-slate-300">
+                        <i class="fa-solid fa-microchip text-sky-400"></i>
+                        <span class="text-xs font-mono font-medium">Metodologi Lab: <span class="text-white">AI-Assisted Dev & Rapid Prototyping</span></span>
+                    </div>
+                </div>
+                
+                <!-- Quick stats -->
+                <div class="grid grid-cols-3 gap-4 mt-8 max-w-lg mx-auto bg-white/50 p-4 rounded-2xl border border-slate-200/50">
+                    <div class="text-center">
+                        <span class="block text-2xl font-bold text-slate-900">1</span>
+                        <span class="text-xs text-slate-500 uppercase tracking-wide font-medium">Live Projects</span>
+                    </div>
+                    <div class="text-center border-x border-slate-200">
+                        <span class="block text-2xl font-bold text-slate-900">1</span>
+                        <span class="text-xs text-slate-500 uppercase tracking-wide font-medium">In Dev</span>
+                    </div>
+                    <div class="text-center">
+                        <span class="block text-2xl font-bold text-slate-900">∞</span>
+                        <span class="text-xs text-slate-500 uppercase tracking-wide font-medium">Ideas</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Lab Objectives / Pillars Section -->
+            <section class="mb-20 max-w-5xl mx-auto">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <!-- Pillar 1 -->
+                    <div class="bg-white/60 backdrop-blur-sm p-6 rounded-2xl border border-slate-200/60 hover:bg-white transition-colors shadow-sm">
+                        <div class="w-10 h-10 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mb-4">
+                            <i class="fa-solid fa-bolt text-lg"></i>
+                        </div>
+                        <h4 class="text-base font-bold text-slate-900 mb-2">Utilitas Tanpa Friksi</h4>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Membangun alat digital publik yang langsung bisa dipakai. Tanpa birokrasi login yang rumit, ringan, dan berfokus murni pada penyelesaian masalah secara instan.
+                        </p>
+                    </div>
+
+                    <!-- Pillar 2 -->
+                    <div class="bg-white/60 backdrop-blur-sm p-6 rounded-2xl border border-slate-200/60 hover:bg-white transition-colors shadow-sm">
+                        <div class="w-10 h-10 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center mb-4">
+                            <i class="fa-solid fa-rocket text-lg"></i>
+                        </div>
+                        <h4 class="text-base font-bold text-slate-900 mb-2">Inkubasi Super Cepat</h4>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Taman bermain eksperimental. Mengubah ide mentah menjadi prototipe fungsional dalam hitungan hari, dieksekusi menggunakan metodologi AI-Assisted modern.
+                        </p>
+                    </div>
+
+                    <!-- Pillar 3 -->
+                    <div class="bg-white/60 backdrop-blur-sm p-6 rounded-2xl border border-slate-200/60 hover:bg-white transition-colors shadow-sm">
+                        <div class="w-10 h-10 rounded-full bg-sky-100 text-sky-600 flex items-center justify-center mb-4">
+                            <i class="fa-solid fa-code-merge text-lg"></i>
+                        </div>
+                        <h4 class="text-base font-bold text-slate-900 mb-2">Fokus Pada Eksekusi</h4>
+                        <p class="text-sm text-slate-600 leading-relaxed">
+                            Menghindari jebakan teori yang rumit. Daripada membiarkan ide menumpuk, kami lebih memilih mengeksekusinya menjadi karya nyata yang bisa langsung disentuh dan dirasakan manfaatnya.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Projects Grid Section -->
+            <section class="mb-16">
+                <div class="flex items-center justify-between mb-8">
+                    <div class="flex items-center space-x-2">
+                        <div class="h-6 w-1 bg-sky-500 rounded-full"></div>
+                        <h3 class="text-xl font-bold text-slate-900">Inkubator Proyek</h3>
+                    </div>
+                    <span class="text-xs font-mono text-slate-400">Total: 2 Proyek Terdaftar</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+                    <!-- Card 1: DiChat (Live) -->
+                    <div class="group relative bg-white rounded-2xl border border-slate-200/70 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between hover:-translate-y-1">
+                        <div class="p-6">
+                            <!-- Header Card -->
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-sky-50 border border-sky-100 flex items-center justify-center text-sky-500">
+                                    <i class="fa-solid fa-comments text-2xl"></i>
+                                </div>
+                                <span class="px-2.5 py-1 text-xs font-mono font-semibold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 flex items-center gap-1.5">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                                    LIVE
+                                </span>
+                            </div>
+                            
+                            <!-- Content -->
+                            <h4 class="text-xl font-bold text-slate-950 mb-2 group-hover:text-sky-600 transition-colors">Dichat</h4>
+                            <p class="text-sm text-slate-600 mb-4 leading-relaxed">
+                                Aplikasi percakapan instan real-time sederhana berbasis web yang cepat dan ringan. Saling terhubung tanpa hambatan.
+                            </p>
+                            
+                            <!-- Path details -->
+                            <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100 font-mono text-xs text-slate-500 space-y-1">
+                                <div class="flex justify-between">
+                                    <span>Main Path:</span>
+                                    <span class="text-sky-600">/dichat</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Subdomain:</span>
+                                    <span class="text-slate-700">dichat.dijumper.web.id</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer Actions -->
+                        <div class="p-6 pt-0 border-t border-slate-100/50 mt-auto flex gap-2">
+                            <a href="/dichat" class="flex-1 inline-flex items-center justify-center bg-sky-500 hover:bg-sky-600 text-white text-sm font-semibold py-2 px-4 rounded-xl transition-colors gap-1 shadow-sm">
+                                Buka di Lab <i class="fa-solid fa-arrow-right text-xs"></i>
+                            </a>
+                            <a href="https://dichat.dijumper.web.id" target="_blank" rel="noopener noreferrer" class="inline-flex items-center justify-center bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-sm font-medium py-2 px-3 rounded-xl transition-colors" title="Buka via Subdomain Utama">
+                                <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Card 2: Webshare (In Development) -->
+                    <div class="group relative bg-white rounded-2xl border border-slate-200/70 overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between hover:-translate-y-1">
+                        <div class="p-6">
+                            <!-- Header Card -->
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="w-12 h-12 rounded-xl bg-amber-50 border border-amber-100 flex items-center justify-center text-amber-500">
+                                    <i class="fa-solid fa-share-nodes text-2xl"></i>
+                                </div>
+                                <span class="px-2.5 py-1 text-xs font-mono font-semibold rounded-full bg-amber-50 text-amber-800 border border-amber-200 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-screwdriver-wrench text-[10px]"></i>
+                                    DEV
+                                </span>
+                            </div>
+                            
+                            <!-- Content -->
+                            <h4 class="text-xl font-bold text-slate-950 mb-2 group-hover:text-amber-600 transition-colors">Webshare</h4>
+                            <p class="text-sm text-slate-600 mb-4 leading-relaxed">
+                                Portal berbagi file instan, teks, atau tautan lintas perangkat dengan mudah tanpa ribet sinkronisasi akun.
+                            </p>
+                            
+                            <!-- Path details -->
+                            <div class="bg-slate-50 p-2.5 rounded-lg border border-slate-100 font-mono text-xs text-slate-500 space-y-1">
+                                <div class="flex justify-between">
+                                    <span>Main Path:</span>
+                                    <span class="text-amber-600">/webshare</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Status:</span>
+                                    <span class="text-slate-700">Tahap Pengembangan</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer Actions -->
+                        <div class="p-6 pt-0 border-t border-slate-100/50 mt-auto">
+                            <button onclick="showToast('Webshare sedang disiapkan! Pantau terus perkembangannya.', 'info')" class="w-full inline-flex items-center justify-center bg-slate-100 hover:bg-slate-200 text-slate-600 text-sm font-semibold py-2 px-4 rounded-xl transition-colors gap-2">
+                                <i class="fa-solid fa-hourglass-half text-xs"></i> Segera Hadir
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Card 3: Ideas Sandbox (Planned) -->
+                    <div class="border-2 border-dashed border-slate-300/80 rounded-2xl p-6 flex flex-col justify-center items-center text-center bg-slate-50/50 hover:bg-slate-50 transition-colors min-h-[280px]">
+                        <div class="w-12 h-12 rounded-full border border-dashed border-slate-300 flex items-center justify-center text-slate-400 mb-4 bg-white">
+                            <i class="fa-solid fa-circle-plus text-xl"></i>
+                        </div>
+                        <h4 class="text-base font-bold text-slate-800 mb-1">Eksperimen Selanjutnya</h4>
+                        <p class="text-xs text-slate-500 max-w-[200px] mb-4">
+                            Punya ide proyek utilitas web lain yang seru untuk dibangun?
+                        </p>
+                        <button onclick="terminalTrigger('suggest')" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-white border border-slate-200 hover:border-slate-300 text-xs font-semibold text-slate-700 transition-colors shadow-sm">
+                            <i class="fa-regular fa-comment text-sky-500"></i> Kirim Usulan
+                        </button>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Lab Terminal Section -->
+            <section class="max-w-3xl mx-auto">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-xs font-mono font-semibold text-slate-500 flex items-center gap-1.5">
+                        <i class="fa-solid fa-terminal text-sky-500"></i> LAB_DIJUMPER_CONSOLE.sh
+                    </span>
+                    <button onclick="clearTerminal()" class="text-xs font-mono text-slate-400 hover:text-slate-600 transition-colors">
+                        [Clear Console]
+                    </button>
+                </div>
+                
+                <div class="terminal-container rounded-xl shadow-2xl overflow-hidden font-mono text-sm text-slate-300">
+                    <!-- Terminal Header Bar -->
+                    <div class="bg-[#131b2e] border-b border-slate-800 px-4 py-2 flex items-center justify-between">
+                        <div class="flex items-center space-x-1.5">
+                            <span class="w-3 h-3 rounded-full bg-red-500/80"></span>
+                            <span class="w-3 h-3 rounded-full bg-amber-500/80"></span>
+                            <span class="w-3 h-3 rounded-full bg-green-500/80"></span>
+                        </div>
+                        <span class="text-xs text-slate-500">node: dijumper-lab-server</span>
+                        <div class="w-10"></div>
+                    </div>
+                    
+                    <!-- Terminal Body -->
+                    <div id="terminal-body" class="p-4 h-60 overflow-y-auto space-y-2 scrollbar-thin scrollbar-thumb-slate-800">
+                        <div class="text-slate-500">// Selamat datang di konsol sistem DIJUMPER Lab.</div>
+                        <div class="text-slate-500">// Ketik <span class="text-sky-400">help</span> untuk melihat daftar instruksi yang tersedia.</div>
+                        <div class="text-slate-300">dijumper@lab:~$ <span class="text-emerald-400">welcome</span></div>
+                        <div class="text-slate-400">Inisialisasi modul Lab berhasil... Seluruh proxy routing `/webshare` dan `/dichat` siap melayani request.</div>
+                    </div>
+                    
+                    <!-- Terminal Input -->
+                    <form id="terminal-form" class="border-t border-slate-800 flex items-center px-4 py-2.5 bg-[#080c14]">
+                        <span class="text-emerald-400 font-bold mr-2">dijumper@lab:~$</span>
+                        <input type="text" id="terminal-input" autocomplete="off" class="bg-transparent border-none outline-none focus:ring-0 flex-grow text-slate-200 text-sm" placeholder="Ketik perintah di sini..." />
+                        <button type="submit" class="text-slate-500 hover:text-sky-400 transition-colors">
+                            <i class="fa-solid fa-play"></i>
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer class="w-full border-t border-slate-200/60 py-6 glass-panel text-center text-xs text-slate-500 font-mono">
+            <div class="max-w-7xl mx-auto px-4 flex flex-col justify-center items-center gap-4">
+                <div>
+                    &copy; 2026 <a href="https://dijumper.web.id" class="text-slate-700 hover:text-sky-500 font-semibold underline decoration-dotted">DIJUMPER</a>. <span class="ml-1 text-slate-400 hidden sm:inline-block">Architected by Human, Accelerated by AI.</span>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Scripts Section -->
+    <script>
+        // Interactive Canvas Particle System
+        const canvas = document.getElementById('labCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let particlesArray = [];
+        const maxParticles = 60;
+        let mouse = {
+            x: null,
+            y: null,
+            radius: 120
+        };
+
+        // Resize Canvas dynamically
+        function initCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            createParticles();
+        }
+
+        window.addEventListener('resize', initCanvas);
+
+        // Capture Mouse Position
+        window.addEventListener('mousemove', function(event) {
+            mouse.x = event.x;
+            mouse.y = event.y;
+        });
+
+        window.addEventListener('mouseout', function() {
+            mouse.x = null;
+            mouse.y = null;
+        });
+
+        // Particle Class representing molecular nodes
+        class Particle {
+            constructor(x, y, directionX, directionY, size, color) {
+                this.x = x;
+                this.y = y;
+                this.directionX = directionX;
+                this.directionY = directionY;
+                this.size = size;
+                this.color = color;
+            }
+
+            draw() {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2, false);
+                ctx.fillStyle = this.color;
+                ctx.fill();
+            }
+
+            update() {
+                // Keep particles inside the screen limits
+                if (this.x > canvas.width || this.x < 0) {
+                    this.directionX = -this.directionX;
+                }
+                if (this.y > canvas.height || this.y < 0) {
+                    this.directionY = -this.directionY;
+                }
+
+                // Mouse interaction physics (repel slightly)
+                if (mouse.x && mouse.y) {
+                    let dx = mouse.x - this.x;
+                    let dy = mouse.y - this.y;
+                    let distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < mouse.radius) {
+                        if (mouse.x < this.x && this.x < canvas.width - this.size * 10) {
+                            this.x += 2;
+                        }
+                        if (mouse.x > this.x && this.x > this.size * 10) {
+                            this.x -= 2;
+                        }
+                        if (mouse.y < this.y && this.y < canvas.height - this.size * 10) {
+                            this.y += 2;
+                        }
+                        if (mouse.y > this.y && this.y > this.size * 10) {
+                            this.y -= 2;
+                        }
+                    }
+                }
+
+                this.x += this.directionX * 0.4;
+                this.y += this.directionY * 0.4;
+                this.draw();
+            }
+        }
+
+        // Fill array with particles
+        function createParticles() {
+            particlesArray = [];
+            let size = 2.5;
+            for (let i = 0; i < maxParticles; i++) {
+                let x = (Math.random() * ((canvas.width - size * 2) - (size * 2)) + size * 2);
+                let y = (Math.random() * ((canvas.height - size * 2) - (size * 2)) + size * 2);
+                let directionX = (Math.random() * 2) - 1;
+                let directionY = (Math.random() * 2) - 1;
+                // Soft blue and gray colors for sterile laboratory look
+                let color = i % 2 === 0 ? 'rgba(14, 165, 233, 0.15)' : 'rgba(148, 163, 184, 0.12)';
+                
+                particlesArray.push(new Particle(x, y, directionX, directionY, size, color));
+            }
+        }
+
+        // Connecting lines to simulate molecular bonds or network structures
+        function connectParticles() {
+            let opacityValue = 1;
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    let distance = ((particlesArray[a].x - particlesArray[b].x) * (particlesArray[a].x - particlesArray[b].x))
+                                 + ((particlesArray[a].y - particlesArray[b].y) * (particlesArray[a].y - particlesArray[b].y));
+                    
+                    // Connection distance threshold
+                    if (distance < (canvas.width / 8) * (canvas.height / 8)) {
+                        opacityValue = 1 - (distance / 20000);
+                        ctx.strokeStyle = `rgba(14, 165, 233, ${opacityValue * 0.08})`;
+                        ctx.lineWidth = 0.8;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        // Main animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+            }
+            connectParticles();
+        }
+
+        // Toast Alerts system (Custom Notification replacing native alert)
+        function showToast(message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            
+            const bgClass = type === 'success' ? 'bg-emerald-50 border-emerald-200 text-emerald-800' :
+                            type === 'error' ? 'bg-rose-50 border-rose-200 text-rose-800' :
+                            'bg-sky-50 border-sky-200 text-sky-800';
+            
+            const iconClass = type === 'success' ? 'fa-check-circle text-emerald-500' :
+                              type === 'error' ? 'fa-triangle-exclamation text-rose-500' :
+                              'fa-info-circle text-sky-500';
+
+            toast.className = `flex items-center gap-3 px-4 py-3 rounded-xl border ${bgClass} shadow-lg pointer-events-auto transform transition-all duration-300 translate-y-2 opacity-0 max-w-sm`;
+            toast.innerHTML = `
+                <i class="fa-solid ${iconClass} text-lg"></i>
+                <p class="text-xs font-semibold font-mono">${message}</p>
+                <button class="ml-auto text-slate-400 hover:text-slate-600" onclick="this.parentElement.remove()">&times;</button>
+            `;
+
+            container.appendChild(toast);
+            
+            // Trigger animation in
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 50);
+
+            // Trigger animation out
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => toast.remove(), 300);
+            }, 4000);
+        }
+
+        // Lab Terminal Emulator Logic
+        const terminalBody = document.getElementById('terminal-body');
+        const terminalForm = document.getElementById('terminal-form');
+        const terminalInput = document.getElementById('terminal-input');
+
+        function appendToTerminal(input, output, isError = false) {
+            if (input !== null) {
+                const inputLine = document.createElement('div');
+                inputLine.className = 'text-slate-300';
+                inputLine.innerHTML = `<span class="text-emerald-400 font-bold">dijumper@lab:~$</span> ${escapeHTML(input)}`;
+                terminalBody.appendChild(inputLine);
+            }
+
+            if (output !== null) {
+                const outputLine = document.createElement('div');
+                outputLine.className = isError ? 'text-rose-400' : 'text-slate-400';
+                outputLine.innerHTML = output;
+                terminalBody.appendChild(outputLine);
+            }
+
+            // Scroll to bottom
+            terminalBody.scrollTop = terminalBody.scrollHeight;
+        }
+
+        function escapeHTML(str) {
+            return str.replace(/[&<>'"]/g, 
+                tag => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' }[tag] || tag)
+            );
+        }
+
+        function clearTerminal() {
+            terminalBody.innerHTML = `<div class="text-slate-500">// Terminal dibersihkan. Hubungkan ulang ke lab.dijumper.web.id</div>`;
+        }
+
+        function terminalTrigger(action) {
+            terminalInput.focus();
+            if (action === 'suggest') {
+                terminalInput.value = 'suggest "Ide Projek Baru Anda"';
+            }
+        }
+
+        // Predefined Terminal commands
+        terminalForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const input = terminalInput.value.trim();
+            if (input === '') return;
+
+            const parts = input.split(' ');
+            const command = parts[0].toLowerCase();
+            const args = parts.slice(1).join(' ');
+
+            let response = '';
+            let isError = false;
+
+            switch (command) {
+                case 'help':
+                    response = `Perintah yang tersedia:<br>
+                    - <span class="text-sky-400">help</span>: Menampilkan daftar perintah konsol ini.<br>
+                    - <span class="text-sky-400">projects</span>: Menampilkan semua daftar project inkubator.<br>
+                    - <span class="text-sky-400">manifesto</span>: Membaca filosofi pengembangan DIJUMPER Lab.<br>
+                    - <span class="text-sky-400">suggest [pesan]</span>: Mengirim usulan ide project ke DIJUMPER.<br>
+                    - <span class="text-sky-400">about</span>: Informasi tentang DIJUMPER Lab.<br>
+                    - <span class="text-sky-400">clear</span>: Membersihkan tampilan terminal.`;
+                    break;
+                case 'status':
+                    response = `Mengecek rute proksi lab...<br>
+                    - /dichat : Active<br>
+                    - /webshare : Development`;
+                    break;
+                case 'projects':
+                    response = `Daftar Modul Lab Terpasang:<br>
+                    1. <span class="text-sky-400">dichat</span> [Active] - real-time messaging di /dichat<br>
+                    2. <span class="text-sky-400">webshare</span> [Pending/Dev] - sharing media instan di /webshare`;
+                    break;
+                case 'manifesto':
+                    response = `[+] <span class="text-emerald-400">DIJUMPER LAB MANIFESTO</span><br>
+                    "Kami memposisikan diri sebagai Arsitek Sistem. Kami percaya bahwa pemecahan masalah dan inovasi adalah inti dari rekayasa perangkat lunak. AI adalah kepanjangan tangan kami untuk mengeksekusi visi menjadi produk nyata dengan cepat (ship fast). Human Vision, Machine Execution."`;
+                    break;
+                case 'suggest':
+                    if (!args) {
+                        response = `Gagal: Gunakan format perintah <span class="text-amber-400">suggest "[Ide Anda di sini]"</span>`;
+                        isError = true;
+                    } else {
+                        response = `<span class="text-emerald-400">Berhasil!</span> Ide Anda "${args}" telah didaftarkan dalam backlog riset DIJUMPER Lab. Terima kasih banyak!`;
+                        showToast("Masukan Anda berhasil dikirim ke server Lab!", "success");
+                    }
+                    break;
+                case 'about':
+                    response = `DIJUMPER Lab v1.0.0.<br>
+                    Sebuah wadah eksperimen digital dan prototipe aplikasi dari DIJUMPER. Kami merakit alat bantu (tools) dan aplikasi web sederhana, ringan, dan bermanfaat untuk publik.`;
+                    break;
+                case 'clear':
+                    clearTerminal();
+                    terminalInput.value = '';
+                    return;
+                case 'welcome':
+                    response = `Selamat datang kembali di sistem DIJUMPER Lab. Terminal siap digunakan.`;
+                    break;
+                default:
+                    response = `Command not found: "${command}". Ketik <span class="text-sky-400">help</span> untuk bantuan instruksi.`;
+                    isError = true;
+            }
+
+            appendToTerminal(input, response, isError);
+            terminalInput.value = '';
+        });
+
+        // Initialize things on window load
+        window.onload = function() {
+            initCanvas();
+            animate();
+        };
+    </script>
+</body>
+</html>
