@@ -1,2 +1,1 @@
-# Baru lakukan Proxy ke project anakan (Rewrite 200)
-/dichat/*  https://dijumper-chat.netlify.app/:splat  200
+/dichat/*  https://dijumper-chat.netlify.app/:splat  301
