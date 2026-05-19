@@ -1,5 +1,2 @@
-# Paksa tambah garis miring (Redirect 301)
-/dichat    /dichat/  301!
-
 # Baru lakukan Proxy ke project anakan (Rewrite 200)
 /dichat/*  https://dijumper-chat.netlify.app/:splat  200
